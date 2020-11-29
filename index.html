@@ -257,6 +257,9 @@
 				// move the balls
 				player_ball.move();
 
+				// check if the balls have collided with a boundary
+				player_ball.boundary_check();
+
 				//clamp the angle between -maxAngle to maxAngle
 				xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
 				yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
@@ -278,9 +281,6 @@
 					player_ball.vx -= xAccel;
 					player_ball.vy += yAccel;
 				}
-
-				// check if the balls have collided with a boundary
-				player_ball.boundary_check();
 
 				if(arrowUp){
 					player_ball.vy -= moveSpeed;
