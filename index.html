@@ -87,19 +87,19 @@
 			// determine if the ball has hit a boundary, multiply it by the 
 			// bounce values for the desired effect
 			boundary_check() {
-				if ((this.y + this.radius) >= canvas.height){
+				if ((this.y + this.radius) > canvas.height){
 					this.vy = 0;
 					this.y = canvas.height - this.radius;
 				}
-				else if((this.y - this.radius) <= 0) {
+				else if((this.y - this.radius) < 0) {
 					this.vy = 0;
 					this.y = this.radius;
 				}
-				if ((this.x + this.radius) >= canvas.width){
+				if ((this.x + this.radius) > canvas.width){
 					this.vx = 0;
 					this.x = canvas.width - this.radius;
 				}
-				else if((this.x - this.radius) <= 0) {
+				else if((this.x - this.radius) < 0) {
 					this.vx = 0;
 					this.x = this.radius;
 				}
