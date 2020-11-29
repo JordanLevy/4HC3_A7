@@ -21,6 +21,9 @@
 
 	<script>
 
+	var player_ball;
+	var hole;
+
 	var arrowUp = false;
 	var arrowDown = false;
 	var arrowRight = false;
@@ -159,13 +162,6 @@
 			}
 		}
 
-		var player_ball;
-		var hole;
-		var xdir;
-		var ydir;
-		var vx;
-		var vy;
-
 		function initGame(){
 			while(true)
 			{
@@ -173,7 +169,7 @@
 				player_ball = new ball(Math.floor((Math.random() * (canvas.width - 25)) + 25),Math.floor((Math.random() * (canvas.height - 25)) + 25),0,0,0,0,25,'green');
 
 				// create the square hole
-				hole = new square(Math.floor((Math.random() * (canvas.width - 50)) + 0),Math.floor((Math.random() * (canvas.height - 50)) + 0),vx,vy,-1,-1,50,'black');
+				hole = new square(Math.floor((Math.random() * (canvas.width - 50)) + 0),Math.floor((Math.random() * (canvas.height - 50)) + 0),0,0,0,0,50,'black');
 
 				//if the ball and hole aren't overlapping when spawned
 				if(!gameWon(player_ball, hole)){
