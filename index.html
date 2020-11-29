@@ -42,7 +42,6 @@
 			alpha = e.alpha;
 			beta = e.beta;
 			gamma = e.gamma;
-			console.log(alpha, beta, gamma);
 		}
 
 		function resize(){
@@ -267,7 +266,7 @@
 
 			
 
-			//flip x if they are holding the phone the other way
+			//flip certain axes depending on mobile device orientation
 			if(orientation == 0){
 				player_ball.vx += yAccel;
 				player_ball.vy += xAccel;
@@ -280,9 +279,6 @@
 				player_ball.vx -= xAccel;
 				player_ball.vy += yAccel;
 			}
-
-			// check if the balls have collided with a boundary
-			player_ball.boundary_check();
 
 			/*if(arrowUp){
 				player_ball.vy -= maxAcceleration;
@@ -309,6 +305,9 @@
 				player_ball.vy = Math.min(0, player_ball.vy + friction);
 			}
 
+			// check if the balls have collided with a boundary
+			player_ball.boundary_check();
+
 			// if a collision occurs, the game is won
 			if (gameWon(player_ball, hole)) {
 				wins++;
@@ -332,8 +331,8 @@
 
 			// draw the wins to the screen in the top-left corner
 			c.font = "20px serif";
+			c.fillStyle = 'black';
 			c.fillText("Wins: " + wins, 5, 20);
-			c.fillText("Orientation: " + orientation, 100, 20);
 		}
 
 		// game loop runs every 30 milliseconds
