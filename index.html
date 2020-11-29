@@ -29,7 +29,7 @@
 	var arrowRight = false;
 	var arrowLeft = false;
 
-	var moveSpeed = 1;
+	var moveSpeed = 2;
 	var friction = 0.5;
 	var tiltMoveCoefficient = 0.1;
 	var maxAngle = 70;
@@ -45,6 +45,9 @@
 	var winAnimationFrame = 0;
 	var winAnimationLength = 10;
 
+	// keep track of the number of times the player ball collides with enemy
+	var wins = 0;
+
 	var canvas = null;
 	var c = null;
 
@@ -58,13 +61,11 @@
 		// use a ball class to create ball objects... reduces code duplication
 		class ball {
 			// create a ball object
-			constructor(x,y,vx,vy,bvx,bvy,radius,color) {
+			constructor(x,y,vx,vy,radius,color) {
 				this.x = x;  // x position
 				this.y = y;  // y position
 				this.vx = vx; // x velocity
 				this.vy = vy; // y velocity
-				this.bvx = bvx; // x velocity after bounce = vx * bvx
-				this.bvy = bvy; // y velocity after bounce = vy * bvy
 				this.radius = radius; 
 				this.color = color;
 			}
@@ -86,20 +87,20 @@
 			// determine if the ball has hit a boundary, multiply it by the 
 			// bounce values for the desired effect
 			boundary_check() {
-				if ((this.y + this.radius) > canvas.height){
-					this.vy = this.bvy * this.vy;
+				if ((this.y + this.radius) >= canvas.height){
+					this.vy = 0;
 					this.y = canvas.height - this.radius;
 				}
-				else if((this.y - this.radius) < 0) {
-					this.vy = this.bvy * this.vy;
+				else if((this.y - this.radius) <= 0) {
+					this.vy = 0;
 					this.y = this.radius;
 				}
-				if ((this.x + this.radius) > canvas.width){
-					this.vx = this.bvx * this.vx;
+				if ((this.x + this.radius) >= canvas.width){
+					this.vx = 0;
 					this.x = canvas.width - this.radius;
 				}
-				else if((this.x - this.radius) < 0) {
-					this.vx = this.bvx * this.vx;
+				else if((this.x - this.radius) <= 0) {
+					this.vx = 0;
 					this.x = this.radius;
 				}
 			}
@@ -108,13 +109,11 @@
 		// use a ball class to create ball objects... reduces code duplication
 		class square {
 			// create a ball object
-			constructor(x,y,vx,vy,bvx,bvy,width,color) {
+			constructor(x,y,vx,vy,width,color) {
 				this.x = x;  // x position
 				this.y = y;  // y position
 				this.vx = vx; // x velocity
 				this.vy = vy; // y velocity
-				this.bvx = bvx; // x velocity after bounce = vx * bvx
-				this.bvy = bvy; // y velocity after bounce = vy * bvy
 				this.width = width; 
 				this.color = color;
 			}
@@ -149,24 +148,20 @@
 		//if the browser supports orientation events
 		if (window.DeviceOrientationEvent) {
 		  window.addEventListener('deviceorientation', onTiltDevice, false);
-		  console.log('Device tilt is supported');
 		}
 
 		window.addEventListener("resize", resize);
 
 		resize();
 
-		// keep track of the number of times the player ball collides with enemy
-		var wins = 0;
-
 		function initGame(){
 			while(true)
 			{
 				// create the player ball
-				player_ball = new ball(Math.floor((Math.random() * (canvas.width - 25)) + 25),Math.floor((Math.random() * (canvas.height - 25)) + 25),0,0,0,0,25,'green');
+				player_ball = new ball(Math.floor((Math.random() * (canvas.width - 25)) + 25),Math.floor((Math.random() * (canvas.height - 25)) + 25),0,0,25,'green');
 
 				// create the square hole
-				hole = new square(Math.floor((Math.random() * (canvas.width - 50)) + 0),Math.floor((Math.random() * (canvas.height - 50)) + 0),0,0,0,0,50,'black');
+				hole = new square(Math.floor((Math.random() * (canvas.width - 50)) + 0),Math.floor((Math.random() * (canvas.height - 50)) + 0),0,0,50,'black');
 
 				//if the ball and hole aren't overlapping when spawned
 				if(!gameWon(player_ball, hole)){
@@ -177,53 +172,44 @@
 
 		initGame();
 
-		// change the direction of the ball based on the arrow key input
+		//when the player presses a key
 		document.onkeydown = function(e) {
-			console.log(e.code);
-		switch(e.code){
-			case 'ArrowDown':
-				arrowDown = true;
-				break;
-			case 'ArrowUp':
-				arrowUp = true;
-				break;
-			case 'ArrowRight':
-				arrowRight = true;
-				break;
-			case 'ArrowLeft':
-				arrowLeft = true;
-				break;
-			default:
-				break;
-		}
-		//if (e.code == "ArrowDown") player_ball.vy += 5;
-		//else if (e.code == "ArrowUp") player_ball.vy -= 5;
-		//else if (e.code == "ArrowRight") player_ball.vx += 5;
-		//else if (e.code == "ArrowLeft") player_ball.vx -= 5;        
+			switch(e.code){
+				case 'ArrowDown':
+					arrowDown = true;
+					break;
+				case 'ArrowUp':
+					arrowUp = true;
+					break;
+				case 'ArrowRight':
+					arrowRight = true;
+					break;
+				case 'ArrowLeft':
+					arrowLeft = true;
+					break;
+				default:
+					break;
+			}       
 		};
 
-		// when the player releases a key, stop the movement in that direction
+		// when the player releases a key
 		document.onkeyup = function(e) { 
-		switch(e.code){
-			case 'ArrowDown':
-				arrowDown = false;
-				break;
-			case 'ArrowUp':
-				arrowUp = false;
-				break;
-			case 'ArrowRight':
-				arrowRight = false;
-				break;
-			case 'ArrowLeft':
-				arrowLeft = false;
-				break;
-			default:
-				break;
-		}
-		//if (e.code == "ArrowDown") player_ball.vy = 0;
-		//else if (e.code == "ArrowUp") player_ball.vy = 0;
-		//else if (e.code == "ArrowRight") player_ball.vx = 0;
-		//else if (e.code == "ArrowLeft") player_ball.vx = 0;        
+			switch(e.code){
+				case 'ArrowDown':
+					arrowDown = false;
+					break;
+				case 'ArrowUp':
+					arrowUp = false;
+					break;
+				case 'ArrowRight':
+					arrowRight = false;
+					break;
+				case 'ArrowLeft':
+					arrowLeft = false;
+					break;
+				default:
+					break;
+			}   
 		};
 
 		function gameWon(ball, rect) {
@@ -268,6 +254,9 @@
 		function game_logic()
 		{
 			if(!winAnimation){
+				// move the balls
+				player_ball.move();
+
 				//clamp the angle between -maxAngle to maxAngle
 				xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
 				yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
@@ -275,8 +264,6 @@
 				//linearly interpolate the acceleration to be from 0 to maxAcceleration
 				xAccel *= maxAcceleration/maxAngle;
 				yAccel *= maxAcceleration/maxAngle;
-
-				
 
 				//flip certain axes depending on mobile device orientation
 				if(orientation == 0){
@@ -296,16 +283,16 @@
 				player_ball.boundary_check();
 
 				if(arrowUp){
-					player_ball.vy -= maxAcceleration;
+					player_ball.vy -= moveSpeed;
 				}
 				if(arrowDown){
-					player_ball.vy += maxAcceleration;
+					player_ball.vy += moveSpeed;
 				}
 				if(arrowRight){
-					player_ball.vx += maxAcceleration;
+					player_ball.vx += moveSpeed;
 				}
 				if(arrowLeft){
-					player_ball.vx -= maxAcceleration;
+					player_ball.vx -= moveSpeed;
 				}
 
 				if(player_ball.vx > 0){
@@ -327,8 +314,6 @@
 					player_ball.vy = (hole.y + 25 - player_ball.y)/10;
 					winAnimationFrame = 0;
 				}
-				// move the balls
-				player_ball.move();
 			} else{
 				winAnimationFrame++;
 				player_ball.radius -= 25/10;
