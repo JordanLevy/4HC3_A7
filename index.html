@@ -245,8 +245,17 @@
 			xAccel *= maxAcceleration/maxAngle;
 			yAccel *= maxAcceleration/maxAngle;
 
-			player_ball.vx += xAccel;
-			player_ball.vy += yAccel;
+			
+
+			//flip x if they are holding the phone the other way
+			if(alpha >= 0){
+				player_ball.vx += xAccel;
+				player_ball.vy += yAccel;
+			}
+			else{
+				player_ball.vx -= xAccel;
+				player_ball.vy += yAccel;
+			}
 
 			// check if the balls have collided with a boundary
 			player_ball.boundary_check();
