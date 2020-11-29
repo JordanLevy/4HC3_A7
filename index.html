@@ -48,45 +48,18 @@
 	var x = 0;
 	var y = 0;
 
+	var canvas = null;
+	var c = null;
+
+	// keep track of the number of times the player ball collides with enemy
+	var wins = 0;
+
 	// run the code when the document has finished loading
 	window.onload = function() {
 
-		var canvas = document.getElementById("canvas");
-
-		function onTiltDevice(e){
-			alpha = e.alpha;
-			beta = e.beta;
-			gamma = e.gamma;
-		}
-
-		function resize(){
-			canvas.width  = window.innerWidth*0.95;
-			canvas.height = window.innerHeight*0.95;
-		}
-
-		window.addEventListener("orientationchange", function() {
-		    orientation = screen.orientation.angle;
-		    resize();
-		    initGame();
-		    draw();
-		});
-
-		//if the browser supports orientation events
-		if (window.DeviceOrientationEvent) {
-		  window.addEventListener('deviceorientation', onTiltDevice, false);
-		  console.log('Device tilt is supported');
-		}
-
-		window.addEventListener("resize", resize);
-
-		resize();
-		
-
+		canvas = document.getElementById("canvas");
 		// get the context of the canvas, i.e. the object that allows us to draw
-		var c = canvas.getContext("2d");
-
-		// keep track of the number of times the player ball collides with enemy
-		var wins = 0;
+		c = canvas.getContext("2d");
 
 		// use a ball class to create ball objects... reduces code duplication
 		class ball {
@@ -160,6 +133,34 @@
 				c.fill();          
 			}
 		}
+
+		function onTiltDevice(e){
+			alpha = e.alpha;
+			beta = e.beta;
+			gamma = e.gamma;
+		}
+
+		function resize(){
+			canvas.width  = window.innerWidth*0.95;
+			canvas.height = window.innerHeight*0.95;
+			initGame();
+		    draw();
+		}
+
+		window.addEventListener("orientationchange", function() {
+		    orientation = screen.orientation.angle;
+		    resize();
+		});
+
+		//if the browser supports orientation events
+		if (window.DeviceOrientationEvent) {
+		  window.addEventListener('deviceorientation', onTiltDevice, false);
+		  console.log('Device tilt is supported');
+		}
+
+		window.addEventListener("resize", resize);
+
+		resize();
 
 		function initGame(){
 			while(true)
