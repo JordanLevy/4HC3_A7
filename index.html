@@ -152,16 +152,19 @@
 		var vy;
 
 		function initGame(){
-		// create the player ball
-			player_ball = new ball(100,250,0,0,0,0,25,'green');
+			while(true)
+			{
+				// create the player ball
+				player_ball = new ball(Math.floor((Math.random() * (canvas.width - 25)) + 25),Math.floor((Math.random() * (canvas.height - 25)) + 25),0,0,0,0,25,'green');
 
-			// create the square hole
-			hole;
-			xdir = Math.random() > 0.50 ? 1 : -1;
-			ydir = Math.random() > 0.50 ? 1 : -1;
-			vx = xdir * Math.floor(4 + (Math.random() * 5));
-			vy = ydir * Math.floor(4 + (Math.random() * 5));
-			hole = new square(200+wins*50,200,vx,vy,-1,-1,50,'black');
+				// create the square hole
+				hole = new square(Math.floor((Math.random() * (canvas.width - 50)) + 0),Math.floor((Math.random() * (canvas.height - 50)) + 0),vx,vy,-1,-1,50,'black');
+
+				//if the ball and hole aren't overlapping when spawned
+				if(!gameWon(player_ball, hole)){
+					break;
+				}
+			}
 		}
 
 		initGame();
@@ -280,6 +283,9 @@
 				player_ball.vy += yAccel;
 			}
 
+			// check if the balls have collided with a boundary
+			player_ball.boundary_check();
+
 			/*if(arrowUp){
 				player_ball.vy -= maxAcceleration;
 			}
@@ -304,9 +310,6 @@
 			}else if(player_ball.vy < 0){
 				player_ball.vy = Math.min(0, player_ball.vy + friction);
 			}
-
-			// check if the balls have collided with a boundary
-			player_ball.boundary_check();
 
 			// if a collision occurs, the game is won
 			if (gameWon(player_ball, hole)) {
