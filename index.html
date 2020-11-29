@@ -27,6 +27,8 @@
 	var beta = 0;
 	var gamma = 0;
 
+	var orientation = 0;
+
 	// run the code when the document has finished loading
 	window.onload = function() {
 
@@ -36,6 +38,10 @@
 			gamma = e.gamma;
 			console.log(alpha, beta, gamma);
 		}
+
+		window.addEventListener("orientationchange", function() {
+		    orientation = screen.orientation.angle;
+		});
 
 		//if the browser supports orientation events
 		if (window.DeviceOrientationEvent) {
@@ -248,13 +254,17 @@
 			
 
 			//flip x if they are holding the phone the other way
-			if(alpha >= 0){
+			if(orientation == 0){
+				player_ball.vx += yAccel;
+				player_ball.vy += xAccel;
+			}
+			else if(orientation == 90){
 				player_ball.vx += xAccel;
 				player_ball.vy -= yAccel;
 			}
 			else{
 				player_ball.vx += xAccel;
-				player_ball.vy -= yAccel;
+				player_ball.vy += yAccel;
 			}
 
 			// check if the balls have collided with a boundary
@@ -309,6 +319,7 @@
 			// draw the wins to the screen in the top-left corner
 			c.font = "20px serif";
 			c.fillText("Wins: " + wins, 5, 20);
+			c.fillText("Orientation: " + orientation, 100, 20);
 		}
 
 		// game loop runs every 30 milliseconds
