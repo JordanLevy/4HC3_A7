@@ -67,8 +67,8 @@
 		window.addEventListener("orientationchange", function() {
 		    orientation = screen.orientation.angle;
 		    resize();
-		    x = -1;
 		    initGame();
+		    draw();
 		});
 
 		//if the browser supports orientation events
