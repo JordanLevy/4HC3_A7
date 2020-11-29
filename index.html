@@ -5,7 +5,7 @@
 </head>
 <body>
 
-	<canvas id="canvas" width="1200" height="600" style="border:1px solid black;">
+	<canvas id="canvas">
 	Display this text if browser does not support canvas.
 	</canvas>
 
@@ -49,7 +49,9 @@
 
 		window.addEventListener("orientationchange", function() {
 		    orientation = screen.orientation.angle;
-		    openFullscreen(canvas);
+		    openFullscreen(document.body);
+		    canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
 		});
 
 		//if the browser supports orientation events
@@ -60,6 +62,9 @@
 
 		// get the canvas element 
 		var canvas = document.getElementById("canvas");
+
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
 
 		// get the context of the canvas, i.e. the object that allows us to draw
 		var c = canvas.getContext("2d");
