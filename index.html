@@ -38,6 +38,10 @@
 
 	var orientation = 0;
 
+	var winAnimation = false;
+	var winAnimationFrame = 0;
+	var winAnimationLength = 10;
+
 	// run the code when the document has finished loading
 	window.onload = function() {
 
@@ -132,14 +136,14 @@
 		// use a ball class to create ball objects... reduces code duplication
 		class square {
 			// create a ball object
-			constructor(x,y,vx,vy,bvx,bvy,radius,color) {
+			constructor(x,y,vx,vy,bvx,bvy,width,color) {
 				this.x = x;  // x position
 				this.y = y;  // y position
 				this.vx = vx; // x velocity
 				this.vy = vy; // y velocity
 				this.bvx = bvx; // x velocity after bounce = vx * bvx
 				this.bvy = bvy; // y velocity after bounce = vy * bvy
-				this.radius = radius; 
+				this.width = width; 
 				this.color = color;
 			}
 
@@ -147,7 +151,7 @@
 			draw() {
 				c.beginPath();
 				c.fillStyle = this.color;
-				c.rect(this.x, this.y, this.radius, this.radius);
+				c.rect(this.x, this.y, this.width, this.width);
 				c.fill();          
 			}
 		}
@@ -239,9 +243,9 @@
 				edgeX = rect.x;
 			}
 			//right
-			else if (ball.x > rect.x+rect.radius)
+			else if (ball.x > rect.x+rect.width)
 			{
-				edgeX = rect.x+rect.radius;
+				edgeX = rect.x+rect.width;
 			}
 			//top
 			if (ball.y < rect.y)
@@ -249,9 +253,9 @@
 				edgeY = rect.y;
 			}
 			//bottom
-			else if (ball.y > rect.y+rect.radius)
+			else if (ball.y > rect.y+rect.width)
 			{
-				edgeY = rect.y+rect.radius;
+				edgeY = rect.y+rect.width;
 			}
 
 			//find pythagorean distance between closest edge and the ball
@@ -267,66 +271,79 @@
 		// recogonizes and carries out any game logic, i.e. collisions 
 		function game_logic()
 		{
-			//clamp the angle between -maxAngle to maxAngle
-			xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
-			yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
+			if(!winAnimation){
+				//clamp the angle between -maxAngle to maxAngle
+				xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
+				yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
 
-			//linearly interpolate the acceleration to be from 0 to maxAcceleration
-			xAccel *= maxAcceleration/maxAngle;
-			yAccel *= maxAcceleration/maxAngle;
+				//linearly interpolate the acceleration to be from 0 to maxAcceleration
+				xAccel *= maxAcceleration/maxAngle;
+				yAccel *= maxAcceleration/maxAngle;
 
-			
+				
 
-			//flip certain axes depending on mobile device orientation
-			if(orientation == 0){
-				player_ball.vx += yAccel;
-				player_ball.vy += xAccel;
-			}
-			else if(orientation == 90){
-				player_ball.vx += xAccel;
-				player_ball.vy -= yAccel;
-			}
-			else{
-				player_ball.vx -= xAccel;
-				player_ball.vy += yAccel;
-			}
+				//flip certain axes depending on mobile device orientation
+				if(orientation == 0){
+					player_ball.vx += yAccel;
+					player_ball.vy += xAccel;
+				}
+				else if(orientation == 90){
+					player_ball.vx += xAccel;
+					player_ball.vy -= yAccel;
+				}
+				else{
+					player_ball.vx -= xAccel;
+					player_ball.vy += yAccel;
+				}
 
-			// check if the balls have collided with a boundary
-			player_ball.boundary_check();
+				// check if the balls have collided with a boundary
+				player_ball.boundary_check();
 
-			/*if(arrowUp){
-				player_ball.vy -= maxAcceleration;
-			}
-			if(arrowDown){
-				player_ball.vy += maxAcceleration;
-			}
-			if(arrowRight){
-				player_ball.vx += maxAcceleration;
-			}
-			if(arrowLeft){
-				player_ball.vx -= maxAcceleration;
-			}*/
+				if(arrowUp){
+					player_ball.vy -= maxAcceleration;
+				}
+				if(arrowDown){
+					player_ball.vy += maxAcceleration;
+				}
+				if(arrowRight){
+					player_ball.vx += maxAcceleration;
+				}
+				if(arrowLeft){
+					player_ball.vx -= maxAcceleration;
+				}
 
-			if(player_ball.vx > 0){
-				player_ball.vx = Math.max(0, player_ball.vx - friction);
-			}else if(player_ball.vx < 0){
-				player_ball.vx = Math.min(0, player_ball.vx + friction);
-			}
+				if(player_ball.vx > 0){
+					player_ball.vx = Math.max(0, player_ball.vx - friction);
+				}else if(player_ball.vx < 0){
+					player_ball.vx = Math.min(0, player_ball.vx + friction);
+				}
 
-			if(player_ball.vy > 0){
-				player_ball.vy = Math.max(0, player_ball.vy - friction);
-			}else if(player_ball.vy < 0){
-				player_ball.vy = Math.min(0, player_ball.vy + friction);
-			}
+				if(player_ball.vy > 0){
+					player_ball.vy = Math.max(0, player_ball.vy - friction);
+				}else if(player_ball.vy < 0){
+					player_ball.vy = Math.min(0, player_ball.vy + friction);
+				}
 
-			// if a collision occurs, the game is won
-			if (gameWon(player_ball, hole)) {
-				wins++;
-				initGame();
-			}
+				// if a collision occurs, the game is won
+				if (gameWon(player_ball, hole)) {
+					winAnimation = true;
+					player_ball.vx = (hole.x + 25 - player_ball.x)/10;
+					player_ball.vy = (hole.y + 25 - player_ball.y)/10;
+					winAnimationFrame = 0;
+				}
 
-			// move the balls
-			player_ball.move();
+				// move the balls
+				player_ball.move();
+			} else{
+				winAnimationFrame++;
+				player_ball.radius -= 25/10;
+				player_ball.move();
+				if(winAnimationFrame >= winAnimationLength){
+					winAnimation = false;
+					initGame();
+					wins++;
+				}
+			}
 		}
 
 		// draws the game state to the canvas
