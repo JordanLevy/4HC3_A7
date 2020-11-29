@@ -5,6 +5,15 @@ html, body {
   overflow:hidden;
 }
 
+#canvas {
+    border: 1px solid black;
+    margin: 0;
+    left:0;
+    top:0;
+    position: absolute;
+    padding: 0;
+}
+
 @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
   html {
     transform: rotate(-90deg);

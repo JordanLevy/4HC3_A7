@@ -5,9 +5,14 @@
 </head>
 <body>
 
-	<canvas id="canvas">
-	Display this text if browser does not support canvas.
-	</canvas>
+	<div style="max-height: 100%;max-width:100%;overflow: hidden;">
+        <canvas id="canvas" style="border:1px solid black; padding:0;
+    margin: auto;
+    display: block;">
+			Display this text if browser does not support canvas.
+		</canvas>
+	</div>   
+	
 
 	<script>
 
@@ -31,27 +36,23 @@
 	// run the code when the document has finished loading
 	window.onload = function() {
 
-		function openFullscreen(e) {
-		  if (e.requestFullscreen) {
-		    e.requestFullscreen();
-		  } else if (e.webkitRequestFullscreen) { /* Safari */
-		    e.webkitRequestFullscreen();
-		  } else if (e.msRequestFullscreen) { /* IE11 */
-		    e.msRequestFullscreen();
-		  }
-		}
+		var canvas = document.getElementById("canvas");
 
 		function onTiltDevice(e){
 			alpha = e.alpha;
 			beta = e.beta;
 			gamma = e.gamma;
+			console.log(alpha, beta, gamma);
+		}
+
+		function resize(){
+			canvas.width  = window.innerWidth*0.95;
+			canvas.height = window.innerHeight*0.95;
 		}
 
 		window.addEventListener("orientationchange", function() {
 		    orientation = screen.orientation.angle;
-		    openFullscreen(document.body);
-		    canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
+		    resize();
 		});
 
 		//if the browser supports orientation events
@@ -60,11 +61,10 @@
 		  console.log('Device tilt is supported');
 		}
 
-		// get the canvas element 
-		var canvas = document.getElementById("canvas");
+		window.addEventListener("resize", resize);
 
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		resize();
+		
 
 		// get the context of the canvas, i.e. the object that allows us to draw
 		var c = canvas.getContext("2d");
@@ -169,22 +169,23 @@
 
 		// change the direction of the ball based on the arrow key input
 		document.onkeydown = function(e) {
-			switch(e.code){
-				case 'ArrowDown':
-					arrowDown = true;
-					break;
-				case 'ArrowUp':
-					arrowUp = true;
-					break;
-				case 'ArrowRight':
-					arrowRight = true;
-					break;
-				case 'ArrowLeft':
-					arrowLeft = true;
-					break;
-				default:
-					break;
-			}
+			console.log(e.code);
+		switch(e.code){
+			case 'ArrowDown':
+				arrowDown = true;
+				break;
+			case 'ArrowUp':
+				arrowUp = true;
+				break;
+			case 'ArrowRight':
+				arrowRight = true;
+				break;
+			case 'ArrowLeft':
+				arrowLeft = true;
+				break;
+			default:
+				break;
+		}
 		//if (e.code == "ArrowDown") player_ball.vy += 5;
 		//else if (e.code == "ArrowUp") player_ball.vy -= 5;
 		//else if (e.code == "ArrowRight") player_ball.vx += 5;
