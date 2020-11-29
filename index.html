@@ -67,9 +67,8 @@
 		window.addEventListener("orientationchange", function() {
 		    orientation = screen.orientation.angle;
 		    resize();
-		    if(player_ball && hole){
-				initGame();
-			}
+		    x = -1;
+		    initGame();
 		});
 
 		//if the browser supports orientation events
