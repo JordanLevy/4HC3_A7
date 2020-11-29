@@ -47,6 +47,9 @@
 		function resize(){
 			canvas.width  = window.innerWidth*0.95;
 			canvas.height = window.innerHeight*0.95;
+			if(player_ball && hole){
+				initGame();
+			}
 		}
 
 		window.addEventListener("orientationchange", function() {
