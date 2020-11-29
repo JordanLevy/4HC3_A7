@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="styles.css">
+	<title>Game Loop Example</title>
+</head>
+<body>
+	<canvas id="canvas">
+	Display this text if browser does not support canvas.
+	</canvas>
+
+	<script>
+
+	var arrowUp = false;
+	var arrowDown = false;
+	var arrowRight = false;
+	var arrowLeft = false;
+
+	var friction = 0.5;
+	var tiltMoveCoefficient = 0.1;
+	var maxAngle = 70;
+	var maxAcceleration = 5;
+
+	var alpha = 0;
+	var beta = 0;
+	var gamma = 0;
+
+	// run the code when the document has finished loading
+	window.onload = function() {
+
+		function onTiltDevice(e){
+			alpha = e.alpha;
+			beta = e.beta;
+			gamma = e.gamma;
+			console.log(alpha, beta, gamma);
+		}
+
+		function askPermission() {
+		    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+		      DeviceOrientationEvent.requestPermission()
+		        .then(permissionState => {
+		          if (permissionState === "granted") {
+		            window.addEventListener('deviceorientation', onTiltDevice, false);
+		          }
+		        })
+		        .catch(console.error);
+		    } else {
+		      // handle regular non iOS 13+ devices
+		    }
+		  }
+
+		askPermission();
+
+		//if the browser supports orientation events
+		//if (window.DeviceOrientationEvent) {
+		//  window.addEventListener('deviceorientation', onTiltDevice, false);
+		//  console.log('Device tilt is supported');
+		//}
+
+		// get the canvas element 
+		var canvas = document.getElementById("canvas");
+
+		// get the context of the canvas, i.e. the object that allows us to draw
+		var c = canvas.getContext("2d");
+
+		// keep track of the number of times the player ball collides with enemy
+		var wins = 0;
+
+		// use a ball class to create ball objects... reduces code duplication
+		class ball {
+			// create a ball object
+			constructor(x,y,vx,vy,bvx,bvy,radius,color) {
+				this.x = x;  // x position
+				this.y = y;  // y position
+				this.vx = vx; // x velocity
+				this.vy = vy; // y velocity
+				this.bvx = bvx; // x velocity after bounce = vx * bvx
+				this.bvy = bvy; // y velocity after bounce = vy * bvy
+				this.radius = radius; 
+				this.color = color;
+			}
+
+			// draw the ball to the canvas
+			draw() {
+				c.beginPath();
+				c.fillStyle = this.color;
+				c.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+				c.fill();          
+			}
+
+			// move the ball according to the velocity
+			move() {
+				this.x = this.x + this.vx;
+				this.y = this.y + this.vy;
+			}
+
+			// determine if the ball has hit a boundary, multiply it by the 
+			// bounce values for the desired effect
+			boundary_check() {
+				if ((this.y + this.radius) > canvas.height){
+					this.vy = this.bvy * this.vy;
+					this.y = canvas.height - this.radius;
+				}
+				else if((this.y - this.radius) < 0) {
+					this.vy = this.bvy * this.vy;
+					this.y = this.radius;
+				}
+				if ((this.x + this.radius) > canvas.width){
+					this.vx = this.bvx * this.vx;
+					this.x = canvas.width - this.radius;
+				}
+				else if((this.x - this.radius) < 0) {
+					this.vx = this.bvx * this.vx;
+					this.x = this.radius;
+				}
+			}
+		}
+
+		// use a ball class to create ball objects... reduces code duplication
+		class square {
+			// create a ball object
+			constructor(x,y,vx,vy,bvx,bvy,radius,color) {
+				this.x = x;  // x position
+				this.y = y;  // y position
+				this.vx = vx; // x velocity
+				this.vy = vy; // y velocity
+				this.bvx = bvx; // x velocity after bounce = vx * bvx
+				this.bvy = bvy; // y velocity after bounce = vy * bvy
+				this.radius = radius; 
+				this.color = color;
+			}
+
+			// draw the ball to the canvas
+			draw() {
+				c.beginPath();
+				c.fillStyle = this.color;
+				c.rect(this.x, this.y, this.radius, this.radius);
+				c.fill();          
+			}
+		}
+
+		var player_ball;
+		var hole;
+		var xdir;
+		var ydir;
+		var vx;
+		var vy;
+
+		function initGame(){
+		// create the player ball
+			player_ball = new ball(100,250,0,0,0,0,25,'green');
+
+			// create the square hole
+			hole;
+			xdir = Math.random() > 0.50 ? 1 : -1;
+			ydir = Math.random() > 0.50 ? 1 : -1;
+			vx = xdir * Math.floor(4 + (Math.random() * 5));
+			vy = ydir * Math.floor(4 + (Math.random() * 5));
+			hole = new square(200+wins*50,200,vx,vy,-1,-1,50,'black');
+		}
+
+		initGame();
+
+		// change the direction of the ball based on the arrow key input
+		document.onkeydown = function(e) {
+			console.log(e.code);
+		switch(e.code){
+			case 'ArrowDown':
+				arrowDown = true;
+				break;
+			case 'ArrowUp':
+				arrowUp = true;
+				break;
+			case 'ArrowRight':
+				arrowRight = true;
+				break;
+			case 'ArrowLeft':
+				arrowLeft = true;
+				break;
+			default:
+				break;
+		}
+		//if (e.code == "ArrowDown") player_ball.vy += 5;
+		//else if (e.code == "ArrowUp") player_ball.vy -= 5;
+		//else if (e.code == "ArrowRight") player_ball.vx += 5;
+		//else if (e.code == "ArrowLeft") player_ball.vx -= 5;        
+		};
+
+		// when the player releases a key, stop the movement in that direction
+		document.onkeyup = function(e) { 
+		switch(e.code){
+			case 'ArrowDown':
+				arrowDown = false;
+				break;
+			case 'ArrowUp':
+				arrowUp = false;
+				break;
+			case 'ArrowRight':
+				arrowRight = false;
+				break;
+			case 'ArrowLeft':
+				arrowLeft = false;
+				break;
+			default:
+				break;
+		}
+		//if (e.code == "ArrowDown") player_ball.vy = 0;
+		//else if (e.code == "ArrowUp") player_ball.vy = 0;
+		//else if (e.code == "ArrowRight") player_ball.vx = 0;
+		//else if (e.code == "ArrowLeft") player_ball.vx = 0;        
+		};
+
+		function gameWon(ball, rect) {
+
+			//will hold the value of the x and y of the closest edges in the x and y directions
+			edgeX = ball.x;
+			edgeY = ball.y;
+
+			//find closest edge to set edgeX and edgeY
+			//left
+			if (ball.x < rect.x)
+			{
+				edgeX = rect.x;
+			}
+			//right
+			else if (ball.x > rect.x+rect.radius)
+			{
+				edgeX = rect.x+rect.radius;
+			}
+			//top
+			if (ball.y < rect.y)
+			{
+				edgeY = rect.y;
+			}
+			//bottom
+			else if (ball.y > rect.y+rect.radius)
+			{
+				edgeY = rect.y+rect.radius;
+			}
+
+			//find pythagorean distance between closest edge and the ball
+			distance = Math.sqrt((ball.x-edgeX)**2 + (ball.y-edgeY)**2);
+
+			//if the distance is less than the radius, the ball is in the hole
+			if (distance <= ball.radius) {
+				return true;
+			}
+			return false;
+		}
+
+		// recogonizes and carries out any game logic, i.e. collisions 
+		function game_logic()
+		{
+			// check if the balls have collided with a boundary
+			player_ball.boundary_check();
+
+			/*if(arrowUp){
+				player_ball.vy -= maxAcceleration;
+			}
+			if(arrowDown){
+				player_ball.vy += maxAcceleration;
+			}
+			if(arrowRight){
+				player_ball.vx += maxAcceleration;
+			}
+			if(arrowLeft){
+				player_ball.vx -= maxAcceleration;
+			}*/
+
+			//clamp the angle between -maxAngle to maxAngle
+			xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
+			yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
+
+			//linearly interpolate the acceleration to be from 0 to maxAcceleration
+			xAccel *= maxAcceleration/maxAngle;
+			yAccel *= maxAcceleration/maxAngle;
+
+			player_ball.vx += xAccel;
+			player_ball.vy += yAccel;
+
+			if(player_ball.vx > 0){
+				player_ball.vx = Math.max(0, player_ball.vx - friction);
+			}else if(player_ball.vx < 0){
+				player_ball.vx = Math.min(0, player_ball.vx + friction);
+			}
+
+			if(player_ball.vy > 0){
+				player_ball.vy = Math.max(0, player_ball.vy - friction);
+			}else if(player_ball.vy < 0){
+				player_ball.vy = Math.min(0, player_ball.vy + friction);
+			}
+
+			// if a collision occurs, the game is won
+			if (gameWon(player_ball, hole)) {
+				wins++;
+				initGame();
+			}
+
+			// move the balls
+			player_ball.move();
+		}
+
+		// draws the game state to the canvas
+		function draw()
+		{
+			// clear the canvas so that we start off with a blank canvas
+			c.clearRect(0,0,canvas.width,canvas.height);
+
+			// draw the ball and hole
+			hole.draw();
+			player_ball.draw();
+			
+
+			// draw the wins to the screen in the top-left corner
+			c.font = "20px serif";
+			c.fillText("Wins: " + wins, 5, 20);
+		}
+
+		// game loop runs every 30 milliseconds
+		setInterval(function() {
+			game_logic();
+			draw();
+		} , 30);
+
+		function resize() {
+		    canvas.width = window.innerWidth;
+		    canvas.height = window.innerHeight;
+		    draw();
+		}
+		window.addEventListener('resize', resize, false); resize();
+
+	}
+	</script>
+
+</body>
+</html> 
