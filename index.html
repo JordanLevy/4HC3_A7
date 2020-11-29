@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" href="styles.css">
 	<title>Game Loop Example</title>
 </head>
 <body>
-	<canvas id="canvas">
+	<h1>Game Loop Example</h1>
+
+	<canvas id="canvas" width="1200" height="600" style="border:1px solid black;">
 	Display this text if browser does not support canvas.
 	</canvas>
 
@@ -16,6 +17,7 @@
 	var arrowRight = false;
 	var arrowLeft = false;
 
+	var moveSpeed = 1;
 	var friction = 0.5;
 	var tiltMoveCoefficient = 0.1;
 	var maxAngle = 70;
@@ -35,27 +37,11 @@
 			console.log(alpha, beta, gamma);
 		}
 
-		function askPermission() {
-		    if (typeof DeviceOrientationEvent.requestPermission === "function") {
-		      DeviceOrientationEvent.requestPermission()
-		        .then(permissionState => {
-		          if (permissionState === "granted") {
-		            window.addEventListener('deviceorientation', onTiltDevice, false);
-		          }
-		        })
-		        .catch(console.error);
-		    } else {
-		      // handle regular non iOS 13+ devices
-		    }
-		  }
-
-		askPermission();
-
 		//if the browser supports orientation events
-		//if (window.DeviceOrientationEvent) {
-		//  window.addEventListener('deviceorientation', onTiltDevice, false);
-		//  console.log('Device tilt is supported');
-		//}
+		if (window.DeviceOrientationEvent) {
+		  window.addEventListener('deviceorientation', onTiltDevice, false);
+		  console.log('Device tilt is supported');
+		}
 
 		// get the canvas element 
 		var canvas = document.getElementById("canvas");
@@ -251,6 +237,17 @@
 		// recogonizes and carries out any game logic, i.e. collisions 
 		function game_logic()
 		{
+			//clamp the angle between -maxAngle to maxAngle
+			xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
+			yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
+
+			//linearly interpolate the acceleration to be from 0 to maxAcceleration
+			xAccel *= maxAcceleration/maxAngle;
+			yAccel *= maxAcceleration/maxAngle;
+
+			player_ball.vx += xAccel;
+			player_ball.vy += yAccel;
+
 			// check if the balls have collided with a boundary
 			player_ball.boundary_check();
 
@@ -266,17 +263,6 @@
 			if(arrowLeft){
 				player_ball.vx -= maxAcceleration;
 			}*/
-
-			//clamp the angle between -maxAngle to maxAngle
-			xAccel = Math.max(-maxAngle, Math.min(beta, maxAngle));
-			yAccel = Math.max(-maxAngle, Math.min(gamma, maxAngle));
-
-			//linearly interpolate the acceleration to be from 0 to maxAcceleration
-			xAccel *= maxAcceleration/maxAngle;
-			yAccel *= maxAcceleration/maxAngle;
-
-			player_ball.vx += xAccel;
-			player_ball.vy += yAccel;
 
 			if(player_ball.vx > 0){
 				player_ball.vx = Math.max(0, player_ball.vx - friction);
@@ -321,13 +307,6 @@
 			game_logic();
 			draw();
 		} , 30);
-
-		function resize() {
-		    canvas.width = window.innerWidth;
-		    canvas.height = window.innerHeight;
-		    draw();
-		}
-		window.addEventListener('resize', resize, false); resize();
 
 	}
 	</script>
