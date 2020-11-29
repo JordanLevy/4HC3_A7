@@ -31,15 +31,25 @@
 	// run the code when the document has finished loading
 	window.onload = function() {
 
+		function openFullscreen(e) {
+		  if (e.requestFullscreen) {
+		    e.requestFullscreen();
+		  } else if (e.webkitRequestFullscreen) { /* Safari */
+		    e.webkitRequestFullscreen();
+		  } else if (e.msRequestFullscreen) { /* IE11 */
+		    e.msRequestFullscreen();
+		  }
+		}
+
 		function onTiltDevice(e){
 			alpha = e.alpha;
 			beta = e.beta;
 			gamma = e.gamma;
-			console.log(alpha, beta, gamma);
 		}
 
 		window.addEventListener("orientationchange", function() {
 		    orientation = screen.orientation.angle;
+		    openFullscreen(canvas);
 		});
 
 		//if the browser supports orientation events
@@ -154,23 +164,22 @@
 
 		// change the direction of the ball based on the arrow key input
 		document.onkeydown = function(e) {
-			console.log(e.code);
-		switch(e.code){
-			case 'ArrowDown':
-				arrowDown = true;
-				break;
-			case 'ArrowUp':
-				arrowUp = true;
-				break;
-			case 'ArrowRight':
-				arrowRight = true;
-				break;
-			case 'ArrowLeft':
-				arrowLeft = true;
-				break;
-			default:
-				break;
-		}
+			switch(e.code){
+				case 'ArrowDown':
+					arrowDown = true;
+					break;
+				case 'ArrowUp':
+					arrowUp = true;
+					break;
+				case 'ArrowRight':
+					arrowRight = true;
+					break;
+				case 'ArrowLeft':
+					arrowLeft = true;
+					break;
+				default:
+					break;
+			}
 		//if (e.code == "ArrowDown") player_ball.vy += 5;
 		//else if (e.code == "ArrowUp") player_ball.vy -= 5;
 		//else if (e.code == "ArrowRight") player_ball.vx += 5;
